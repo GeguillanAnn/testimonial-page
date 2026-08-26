@@ -437,7 +437,7 @@
               <label class="filebox" for="videoFile">
                 <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 17v3h16v-3"/></svg>
                 <span style="font-weight:bold;font-size:17px;">Choose a video from your phone or computer</span>
-                <span style="font-size:14px;color:var(--ink-2);">MP4, MOV, or WEBM &middot; up to 3 minutes</span>
+                <span style="font-size:14px;color:var(--ink-2);">MP4, MOV, or WEBM &middot; up to 3 minutes &middot; max <span id="maxMb">100</span> MB</span>
                 <span class="btn btn-quiet" aria-hidden="true" style="margin-top:6px;">Browse files</span>
               </label>
               <input type="file" id="videoFile" accept="video/*" style="position:absolute;width:1px;height:1px;opacity:0;">
@@ -574,9 +574,11 @@
      Leave blank to run the page in demo mode (no data is sent).
      ============================================================ */
   var CONFIG = {
-    WEBHOOK_URL: "",          // e.g. "https://services.leadconnectorhq.com/hooks/xxxxx"
-    MAX_VIDEO_MB: 300,
-    MAX_RECORD_SECONDS: 240   // hard stop at 4 minutes
+    WEBHOOK_URL: "",           // e.g. "https://services.leadconnectorhq.com/hooks/xxxxx"
+    MAX_VIDEO_MB: 100,         // rejects uploads larger than this
+    MAX_RECORD_SECONDS: 240,   // hard stop at 4 minutes
+    VIDEO_BITRATE: 1200000,    // ~30MB for a 3-minute clip, still sharp for a talking head
+    AUDIO_BITRATE: 128000
   };
 
   var PROMPTS = {
@@ -600,6 +602,11 @@
   };
 
   var state = { step:1, role:null, format:null, videoBlob:null, videoName:"" };
+
+  document.addEventListener("DOMContentLoaded", function(){
+    var el = document.getElementById("maxMb");
+    if (el) el.textContent = CONFIG.MAX_VIDEO_MB;
+  });
 
   var $  = function(s){ return document.querySelector(s); };
   var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
@@ -713,7 +720,7 @@
         return reject(tagged("norecorder"));
       }
       navigator.mediaDevices.getUserMedia({
-        video: { facingMode:"user", width:{ ideal:1280 } },
+        video: { facingMode:"user", width:{ ideal:1280 }, height:{ ideal:720 }, frameRate:{ ideal:30, max:30 } },
         audio: true
       }).then(function(s){
         stream = s;
@@ -816,10 +823,20 @@
   function beginRecording(){
     chunks = []; seconds = 0;
     var mime = pickMime();
+    var opts = {
+      videoBitsPerSecond: CONFIG.VIDEO_BITRATE,
+      audioBitsPerSecond: CONFIG.AUDIO_BITRATE
+    };
+    if (mime) opts.mimeType = mime;
     try{
-      recorder = mime ? new MediaRecorder(stream, { mimeType:mime }) : new MediaRecorder(stream);
+      recorder = new MediaRecorder(stream, opts);
     }catch(err){
-      return camFail(tagged("norecorder"));
+      /* some browsers reject the bitrate hints — retry without them */
+      try{
+        recorder = mime ? new MediaRecorder(stream, { mimeType:mime }) : new MediaRecorder(stream);
+      }catch(err2){
+        return camFail(tagged("norecorder"));
+      }
     }
 
     recorder.ondataavailable = function(e){ if (e.data && e.data.size) chunks.push(e.data); };
