@@ -1,0 +1,981 @@
+<title>Lighthouse Voyages Testimonials</title>
+
+<style>
+  :root{
+    color-scheme: light;
+    --cream:#FAF5EC;
+    --cream-deep:#F2E9D8;
+    --white:#FFFFFF;
+    --ink:#2A2A2A;
+    --ink-2:#4B443A;
+    --papaya:#FF8700;
+    --papaya-deep:#B85E00;
+    --papaya-wash:#FFF2E0;
+    --line:#E5D9C3;
+    --line-soft:#EFE6D5;
+    --good:#1F7A4D;
+    --alert:#B3261E;
+    --shadow-sm:0 1px 2px rgba(42,42,42,.05), 0 4px 14px rgba(42,42,42,.06);
+    --shadow-md:0 2px 4px rgba(42,42,42,.06), 0 14px 34px rgba(42,42,42,.09);
+    --r-lg:20px;
+    --r-md:14px;
+    --r-sm:10px;
+    --font:Arial, "Helvetica Neue", Helvetica, sans-serif;
+    --maxw:760px;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    background:var(--cream);
+    color:var(--ink);
+    font-family:var(--font);
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .page{
+    max-width:var(--maxw);
+    margin:0 auto;
+    padding:28px 20px 72px;
+  }
+
+  /* ---------- masthead ---------- */
+  .masthead{ text-align:center; padding:14px 0 6px; }
+  .mark{ display:block; margin:0 auto 18px; width:52px; height:auto; }
+  .eyebrow{
+    font-size:12px; font-weight:bold; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--papaya-deep); margin:0 0 12px;
+  }
+  h1{
+    font-size:38px; line-height:1.15; font-weight:bold;
+    letter-spacing:-.02em; margin:0 0 16px; text-wrap:balance;
+  }
+  .lede{
+    font-size:18px; color:var(--ink-2); margin:0 auto 10px;
+    max-width:54ch; text-wrap:pretty;
+  }
+  .lede.small{ font-size:16px; }
+
+  /* ---------- progress ---------- */
+  .progress{
+    margin:34px 0 30px;
+    padding:16px 6px;
+    background:var(--white);
+    border:1px solid var(--line-soft);
+    border-radius:var(--r-lg);
+    box-shadow:var(--shadow-sm);
+  }
+  .progress ol{
+    list-style:none; margin:0; padding:0;
+    display:grid; grid-template-columns:repeat(4,1fr);
+  }
+  .p-step{ display:flex; flex-direction:column; align-items:center; gap:8px; position:relative; }
+  .p-step::before{
+    content:""; position:absolute; top:15px; left:-50%; width:100%;
+    height:2px; background:var(--line); z-index:0;
+  }
+  .p-step:first-child::before{ display:none; }
+  .p-step.done::before{ background:var(--papaya); }
+  .p-dot{
+    position:relative; z-index:1;
+    width:32px; height:32px; border-radius:50%;
+    background:var(--cream-deep); color:var(--ink-2);
+    border:2px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; font-weight:bold;
+  }
+  .p-label{
+    font-size:12px; font-weight:bold; color:var(--ink-2);
+    text-align:center; line-height:1.3; letter-spacing:.01em;
+  }
+  .p-step.done .p-dot{ background:var(--papaya); border-color:var(--papaya); color:var(--white); }
+  .p-step.current .p-dot{ background:var(--white); border-color:var(--papaya); color:var(--papaya-deep); box-shadow:0 0 0 4px var(--papaya-wash); }
+  .p-step.current .p-label{ color:var(--ink); }
+
+  /* ---------- steps ---------- */
+  .step[hidden]{ display:none; }
+  .step{ display:flex; flex-direction:column; gap:22px; }
+  .step-head h2{
+    font-size:26px; line-height:1.25; margin:0 0 6px; font-weight:bold; letter-spacing:-.01em;
+  }
+  .step-head p{ margin:0; color:var(--ink-2); font-size:16px; }
+
+  .card{
+    background:var(--white);
+    border:1px solid var(--line-soft);
+    border-radius:var(--r-lg);
+    box-shadow:var(--shadow-sm);
+    padding:24px;
+  }
+
+  /* ---------- big choice cards ---------- */
+  .choices{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .choice{
+    appearance:none; -webkit-appearance:none;
+    font-family:inherit; text-align:left; cursor:pointer;
+    background:var(--white);
+    border:2px solid var(--line);
+    border-radius:var(--r-lg);
+    padding:26px 22px;
+    box-shadow:var(--shadow-sm);
+    display:flex; flex-direction:column; gap:12px;
+    transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease, background .18s ease;
+  }
+  .choice:hover{ border-color:var(--papaya); box-shadow:var(--shadow-md); transform:translateY(-2px); }
+  .choice[aria-pressed="true"]{
+    border-color:var(--papaya); background:var(--papaya-wash); box-shadow:var(--shadow-md);
+  }
+  .choice .ic{ width:44px; height:44px; color:var(--papaya-deep); }
+  .choice-title{ font-size:20px; font-weight:bold; color:var(--ink); line-height:1.25; }
+  .choice-sub{ font-size:15px; color:var(--ink-2); line-height:1.45; }
+  .choice-meta{
+    font-size:12px; font-weight:bold; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--papaya-deep);
+  }
+
+  /* ---------- prompts ---------- */
+  .prompts{ background:var(--cream-deep); border:1px solid var(--line); border-radius:var(--r-lg); padding:4px 22px; }
+  .prompts summary{
+    cursor:pointer; list-style:none; padding:18px 0;
+    font-size:17px; font-weight:bold; color:var(--ink);
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .prompts summary::-webkit-details-marker{ display:none; }
+  .prompts summary .chev{ width:18px; height:18px; color:var(--papaya-deep); flex:none; transition:transform .2s ease; }
+  .prompts[open] summary .chev{ transform:rotate(180deg); }
+  .prompts .note{ margin:0 0 14px; font-size:15px; color:var(--ink-2); }
+  .prompts ul{ margin:0 0 20px; padding:0 0 0 4px; list-style:none; display:flex; flex-direction:column; gap:12px; }
+  .prompts li{ display:flex; gap:12px; font-size:16px; color:var(--ink); line-height:1.5; }
+  .prompts li::before{
+    content:""; flex:none; margin-top:9px; width:7px; height:7px; border-radius:50%;
+    background:var(--papaya);
+  }
+
+  /* ---------- fields ---------- */
+  .field{ display:flex; flex-direction:column; gap:8px; }
+  .fields{ display:flex; flex-direction:column; gap:20px; }
+  label.lbl{ font-size:15px; font-weight:bold; color:var(--ink); }
+  .req{ color:var(--papaya-deep); font-weight:bold; }
+  .opt{ font-weight:normal; color:var(--ink-2); font-size:13px; }
+  input[type=text], input[type=email], textarea{
+    font-family:inherit; font-size:17px; color:var(--ink);
+    background:var(--white);
+    border:2px solid var(--line);
+    border-radius:var(--r-md);
+    padding:14px 16px; width:100%;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  input::placeholder, textarea::placeholder{ color:#6E655A; }
+  input:focus, textarea:focus{ outline:none; border-color:var(--papaya); box-shadow:0 0 0 4px var(--papaya-wash); }
+  textarea{ min-height:260px; resize:vertical; line-height:1.65; }
+  .counter{ font-size:13px; color:var(--ink-2); text-align:right; font-variant-numeric:tabular-nums; }
+
+  /* ---------- checkboxes ---------- */
+  .check{
+    display:flex; gap:14px; align-items:flex-start;
+    background:var(--white); border:2px solid var(--line);
+    border-radius:var(--r-md); padding:16px; cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .check:hover{ border-color:var(--papaya); }
+  .check:has(input:checked){ border-color:var(--papaya); background:var(--papaya-wash); }
+  .check input{ flex:none; width:22px; height:22px; margin:1px 0 0; accent-color:var(--papaya); cursor:pointer; }
+  .check span{ font-size:15px; line-height:1.55; color:var(--ink); }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    font-family:inherit; font-size:17px; font-weight:bold; cursor:pointer;
+    border-radius:999px; padding:16px 28px; border:2px solid transparent;
+    display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    transition:background .16s ease, color .16s ease, border-color .16s ease, transform .16s ease;
+  }
+  .btn-primary{ background:var(--papaya); color:#3A1E00; border-color:var(--papaya); }
+  .btn-primary:hover{ background:var(--papaya-deep); border-color:var(--papaya-deep); color:var(--white); }
+  .btn-ghost{ background:transparent; color:var(--ink); border-color:var(--line); }
+  .btn-ghost:hover{ border-color:var(--ink-2); }
+  .btn-quiet{ background:var(--white); color:var(--ink); border-color:var(--line); font-size:15px; padding:12px 20px; }
+  .btn-quiet:hover{ border-color:var(--papaya); }
+  .btn[disabled]{ opacity:.55; cursor:not-allowed; transform:none; }
+  .btn-lg{ font-size:19px; padding:19px 34px; }
+  .nav-row{ display:flex; gap:12px; align-items:center; justify-content:space-between; margin-top:4px; }
+  .nav-row .btn-primary{ flex:1; }
+
+  /* ---------- video ---------- */
+  .vid-modes{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .stage{
+    background:#241F19; border-radius:var(--r-md); overflow:hidden;
+    aspect-ratio:16/10; display:flex; align-items:center; justify-content:center; position:relative;
+  }
+  .stage video{ width:100%; height:100%; object-fit:cover; background:#241F19; display:block; }
+  .stage .placeholder{ color:#EADFCB; font-size:15px; padding:20px; text-align:center; }
+  .rec-bar{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .timer{
+    font-size:20px; font-weight:bold; font-variant-numeric:tabular-nums; color:var(--ink);
+    letter-spacing:.02em;
+  }
+  .rec-dot{
+    display:inline-block; width:12px; height:12px; border-radius:50%; background:var(--alert);
+    margin-right:8px; vertical-align:middle;
+  }
+  .rec-live .rec-dot{ animation:pulse 1.2s infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.25} }
+  .hint{ font-size:14px; color:var(--ink-2); margin:0; }
+  .hint strong{ color:var(--ink); }
+  .filebox{
+    border:2px dashed var(--line); border-radius:var(--r-md); background:var(--cream-deep);
+    padding:26px 20px; text-align:center; display:flex; flex-direction:column; gap:10px; align-items:center;
+  }
+  .filebox .ic{ width:34px; height:34px; color:var(--papaya-deep); }
+  .picked{
+    display:flex; align-items:center; gap:12px; background:var(--papaya-wash);
+    border:2px solid var(--papaya); border-radius:var(--r-md); padding:14px 16px;
+  }
+  .picked .name{ font-size:15px; font-weight:bold; word-break:break-all; }
+  .picked .size{ font-size:13px; color:var(--ink-2); font-variant-numeric:tabular-nums; }
+
+  .quote{
+    border-left:4px solid var(--papaya); padding:2px 0 2px 16px;
+    margin:0; font-size:16px; color:var(--ink-2); line-height:1.55;
+  }
+
+  .divider{ height:1px; background:var(--line); border:0; margin:2px 0; }
+
+  .error{
+    color:var(--alert); font-size:15px; font-weight:bold; margin:0;
+    display:flex; gap:8px; align-items:flex-start;
+  }
+  .error[hidden]{ display:none; }
+
+  .summary-row{
+    display:flex; justify-content:space-between; gap:16px; padding:12px 0;
+    border-bottom:1px solid var(--line-soft); font-size:15px;
+  }
+  .summary-row:last-child{ border-bottom:0; }
+  .summary-row dt{ color:var(--ink-2); margin:0; }
+  .summary-row dd{ margin:0; font-weight:bold; text-align:right; }
+
+  /* ---------- thank you ---------- */
+  #thanks[hidden]{ display:none; }
+  #thanks{ text-align:center; padding:26px 0; }
+  .seal{
+    width:84px; height:84px; margin:0 auto 26px; border-radius:50%;
+    background:var(--papaya-wash); border:2px solid var(--papaya);
+    display:flex; align-items:center; justify-content:center; color:var(--papaya-deep);
+  }
+  .seal svg{ width:42px; height:42px; }
+
+  footer{
+    margin-top:44px; padding-top:22px; border-top:1px solid var(--line);
+    text-align:center; font-size:13px; color:var(--ink-2);
+  }
+
+  :focus-visible{ outline:3px solid var(--papaya-deep); outline-offset:3px; border-radius:6px; }
+
+  @media (max-width:640px){
+    body{ font-size:16px; }
+    .page{ padding:20px 16px 56px; }
+    h1{ font-size:29px; }
+    .lede{ font-size:16px; }
+    .step-head h2{ font-size:22px; }
+    .choices{ grid-template-columns:1fr; }
+    .vid-modes{ grid-template-columns:1fr; }
+    .card{ padding:20px 18px; }
+    .prompts{ padding:2px 18px; }
+    .p-label{ font-size:10.5px; }
+    .p-dot{ width:28px; height:28px; font-size:13px; }
+    .p-step::before{ top:13px; }
+    .btn{ width:100%; }
+    .nav-row{ flex-direction:column-reverse; }
+    .nav-row .btn{ width:100%; }
+    textarea{ min-height:220px; }
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <svg class="mark" viewBox="0 0 64 78" fill="none" aria-hidden="true">
+      <path d="M22 74h20l-3.5-32h-13L22 74z" fill="#FF8700"/>
+      <path d="M25.5 42h13l-1.2-11h-10.6l-1.2 11z" fill="#2A2A2A"/>
+      <rect x="26" y="20" width="12" height="11" rx="2" fill="#FF8700"/>
+      <path d="M32 8l4 9h-8l4-9z" fill="#2A2A2A"/>
+      <path d="M24 25.5L8 20M40 25.5L56 20" stroke="#FF8700" stroke-width="3" stroke-linecap="round"/>
+      <path d="M14 74h36" stroke="#2A2A2A" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <p class="eyebrow">Lighthouse Voyages</p>
+    <h1>Share Your Lighthouse Voyages Experience</h1>
+    <p class="lede">Your story matters to us. Whether you're a client who found the right team member or a VA who found a great opportunity, we'd love to hear about your experience.</p>
+    <p class="lede small">Choose how you'd like to share your testimonial below.</p>
+  </header>
+
+  <nav class="progress" aria-label="Your progress">
+    <ol id="progress">
+      <li class="p-step current" data-step="1"><span class="p-dot">1</span><span class="p-label">Your Role</span></li>
+      <li class="p-step" data-step="2"><span class="p-dot">2</span><span class="p-label">Testimonial Type</span></li>
+      <li class="p-step" data-step="3"><span class="p-dot">3</span><span class="p-label">Your Story</span></li>
+      <li class="p-step" data-step="4"><span class="p-dot">4</span><span class="p-label">Submit</span></li>
+    </ol>
+  </nav>
+
+  <form id="form" novalidate>
+
+    <!-- ============ STEP 1 ============ -->
+    <section class="step" data-step="1" aria-label="Step 1: Who are you">
+      <div class="step-head">
+        <h2>I am a:</h2>
+        <p>Pick the one that fits you. We'll show you questions made for your side of the story.</p>
+      </div>
+
+      <div class="choices">
+        <button type="button" class="choice" data-role="client" aria-pressed="false">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 21V9l7-5 7 5v12"/><path d="M9 21v-6h4v6"/><path d="M17 12h4v9"/><path d="M2 21h20"/>
+          </svg>
+          <span class="choice-title">Client</span>
+          <span class="choice-sub">I hired a virtual assistant through Lighthouse Voyages for my business.</span>
+        </button>
+
+        <button type="button" class="choice" data-role="va" aria-pressed="false">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 20v-1a6 6 0 0 1 6-6h1"/><circle cx="10.5" cy="7" r="3.5"/><path d="M15 16.5l2.2 2.2 4.3-4.6"/>
+          </svg>
+          <span class="choice-title">Virtual Assistant (VA)</span>
+          <span class="choice-sub">I was placed with a client through Lighthouse Voyages.</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ============ STEP 2 ============ -->
+    <section class="step" data-step="2" hidden aria-label="Step 2: Testimonial format">
+      <div class="step-head">
+        <h2>Choose your preferred testimonial format</h2>
+        <p>Both work great. Pick whichever feels easier for you today.</p>
+      </div>
+
+      <div class="choices">
+        <button type="button" class="choice" data-format="video" aria-pressed="false">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="6" width="14" height="12" rx="3"/><path d="M16 10.5l6-3.5v10l-6-3.5z"/>
+          </svg>
+          <span class="choice-title">Video Testimonial</span>
+          <span class="choice-sub">Record or upload a short video.</span>
+          <span class="choice-meta">30 seconds – 3 minutes</span>
+        </button>
+
+        <button type="button" class="choice" data-format="written" aria-pressed="false">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M16.5 3.5l4 4L8 20l-5 1 1-5 12.5-12.5z"/><path d="M14 6l4 4"/>
+          </svg>
+          <span class="choice-title">Written Testimonial</span>
+          <span class="choice-sub">Type your testimonial in your own words.</span>
+          <span class="choice-meta">A few sentences is plenty</span>
+        </button>
+      </div>
+
+      <div class="nav-row">
+        <button type="button" class="btn btn-ghost" data-back>Back</button>
+      </div>
+    </section>
+
+    <!-- ============ STEP 3 ============ -->
+    <section class="step" data-step="3" hidden aria-label="Step 3: Your story">
+      <div class="step-head">
+        <h2 id="storyHeading">Tell us your story</h2>
+        <p id="storySub">Take your time. There's no wrong way to do this.</p>
+      </div>
+
+      <details class="prompts" id="promptsBox" open>
+        <summary>
+          <span>Questions to help you get started</span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </summary>
+        <p class="note"><strong>You do not need to answer every question.</strong> These are just prompts to help you tell your story naturally. Answer the ones that feel right and skip the rest.</p>
+        <ul id="promptList"></ul>
+      </details>
+
+      <!-- video panel -->
+      <div class="card" id="videoPanel" hidden>
+        <div class="fields">
+          <div class="vid-modes">
+            <button type="button" class="btn btn-quiet" id="modeRecord">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5" fill="currentColor"/></svg>
+              Record Video
+            </button>
+            <button type="button" class="btn btn-quiet" id="modeUpload">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 17v3h16v-3"/></svg>
+              Upload Video
+            </button>
+          </div>
+
+          <!-- record -->
+          <div id="recordArea" hidden>
+            <div class="fields">
+              <div class="stage">
+                <video id="preview" playsinline muted></video>
+                <div class="placeholder" id="stagePlaceholder">Starting your camera&hellip;</div>
+              </div>
+              <div class="rec-bar" id="recBar">
+                <button type="button" class="btn btn-primary" id="btnStart">Start Recording</button>
+                <button type="button" class="btn btn-ghost" id="btnStop" hidden>Stop Recording</button>
+                <span class="timer" id="timer" hidden><span class="rec-dot"></span>0:00</span>
+              </div>
+              <p class="hint">Recommended length: <strong>30 seconds to 3 minutes.</strong> Your camera and mic are only used on this page while you record.</p>
+              <p class="error" id="camError" hidden></p>
+            </div>
+          </div>
+
+          <!-- upload -->
+          <div id="uploadArea" hidden>
+            <div class="fields">
+              <label class="filebox" for="videoFile">
+                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 17v3h16v-3"/></svg>
+                <span style="font-weight:bold;font-size:17px;">Choose a video from your phone or computer</span>
+                <span style="font-size:14px;color:var(--ink-2);">MP4, MOV, or WEBM &middot; up to 3 minutes</span>
+                <span class="btn btn-quiet" aria-hidden="true" style="margin-top:6px;">Browse files</span>
+              </label>
+              <input type="file" id="videoFile" accept="video/*" style="position:absolute;width:1px;height:1px;opacity:0;">
+            </div>
+          </div>
+
+          <!-- result -->
+          <div id="videoResult" hidden>
+            <div class="fields">
+              <hr class="divider">
+              <div class="picked" id="pickedRow">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--papaya-deep)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg>
+                <div style="flex:1;min-width:0;">
+                  <div class="name" id="pickedName">Video ready</div>
+                  <div class="size" id="pickedSize"></div>
+                </div>
+                <button type="button" class="btn btn-quiet" id="btnRedo" style="width:auto;">Redo</button>
+              </div>
+              <div class="stage"><video id="playback" controls playsinline></video></div>
+            </div>
+          </div>
+
+          <blockquote class="quote">Don't worry about making it perfect. Just tell us about your experience in your own words!</blockquote>
+        </div>
+      </div>
+
+      <!-- written panel -->
+      <div class="card" id="writtenPanel" hidden>
+        <div class="fields">
+          <div class="field">
+            <label class="lbl" for="story">Your testimonial <span class="req">*</span></label>
+            <textarea id="story" placeholder="Tell us about your experience with Lighthouse Voyages..."></textarea>
+            <div class="counter"><span id="wordCount">0</span> words</div>
+          </div>
+          <blockquote class="quote">Don't worry about making it perfect. Just tell us about your experience in your own words!</blockquote>
+        </div>
+      </div>
+
+      <p class="error" id="storyError" hidden></p>
+
+      <div class="nav-row">
+        <button type="button" class="btn btn-ghost" data-back>Back</button>
+        <button type="button" class="btn btn-primary" id="toStep4">Continue</button>
+      </div>
+    </section>
+
+    <!-- ============ STEP 4 ============ -->
+    <section class="step" data-step="4" hidden aria-label="Step 4: Your details and submit">
+      <div class="step-head">
+        <h2>Last step — where can we credit you?</h2>
+        <p>So we know who to thank, and how to show your name when we share your story.</p>
+      </div>
+
+      <div class="card">
+        <div class="fields">
+          <div class="field">
+            <label class="lbl" for="fullName">Full Name <span class="req">*</span></label>
+            <input type="text" id="fullName" autocomplete="name" placeholder="Jane Santos">
+          </div>
+
+          <div class="field">
+            <label class="lbl" for="email">Email Address <span class="req">*</span></label>
+            <input type="email" id="email" autocomplete="email" placeholder="you@example.com">
+          </div>
+
+          <div class="field" id="companyField" hidden>
+            <label class="lbl" for="company">Company Name <span class="opt">(optional)</span></label>
+            <input type="text" id="company" autocomplete="organization" placeholder="Your business name">
+          </div>
+
+          <div class="field" id="roleField" hidden>
+            <label class="lbl" for="position">Current Role / Position <span class="opt">(optional)</span></label>
+            <input type="text" id="position" autocomplete="organization-title" placeholder="Executive Assistant, Media Buyer, etc.">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="fields">
+          <h3 style="margin:0;font-size:19px;">Permission to share</h3>
+
+          <label class="check">
+            <input type="checkbox" id="consent">
+            <span>I give Lighthouse Voyages permission to use my testimonial, name, photo, written feedback, and/or submitted video for marketing purposes, including its website, social media, advertisements, presentations, and other promotional materials. <span class="req">*</span></span>
+          </label>
+
+          <label class="check">
+            <input type="checkbox" id="tagOk">
+            <span>You may tag or mention me on social media when sharing my testimonial. <span class="opt">(optional)</span></span>
+          </label>
+
+          <div class="field" id="socialField" hidden>
+            <label class="lbl" for="social">Social Media Profile / Handle <span class="opt">(optional)</span></label>
+            <input type="text" id="social" placeholder="@yourhandle or a profile link">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <dl style="margin:0;">
+          <div class="summary-row"><dt>You are a</dt><dd id="sumRole">—</dd></div>
+          <div class="summary-row"><dt>Testimonial format</dt><dd id="sumFormat">—</dd></div>
+        </dl>
+      </div>
+
+      <p class="error" id="submitError" hidden></p>
+
+      <div class="nav-row">
+        <button type="button" class="btn btn-ghost" data-back>Back</button>
+        <button type="submit" class="btn btn-primary btn-lg" id="btnSubmit">Submit My Testimonial</button>
+      </div>
+    </section>
+  </form>
+
+  <!-- ============ THANK YOU ============ -->
+  <section id="thanks" hidden aria-live="polite">
+    <div class="seal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg>
+    </div>
+    <h2 style="font-size:32px;margin:0 0 16px;line-height:1.2;">Thank You for Sharing Your Story! 🎉</h2>
+    <p class="lede">We truly appreciate you taking the time to share your experience with Lighthouse Voyages. Your story helps us improve and helps others understand what it's like to work with our community.</p>
+    <p class="hint" style="margin-top:22px;">A copy of your submission is on its way to our team. If we'd like to feature you, we'll reach out by email first.</p>
+  </section>
+
+  <footer>Lighthouse Voyages &middot; Thank you for being part of our community.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================================================
+     CONFIG — paste your GoHighLevel inbound webhook URL here.
+     Leave blank to run the page in demo mode (no data is sent).
+     ============================================================ */
+  var CONFIG = {
+    WEBHOOK_URL: "",          // e.g. "https://services.leadconnectorhq.com/hooks/xxxxx"
+    MAX_VIDEO_MB: 300,
+    MAX_RECORD_SECONDS: 240   // hard stop at 4 minutes
+  };
+
+  var PROMPTS = {
+    client: [
+      "What was your situation before working with Lighthouse Voyages?",
+      "What made you decide to work with us?",
+      "How was your experience during the VA matching and onboarding process?",
+      "How has your VA helped you or your business?",
+      "What has been the biggest positive change since working with your VA?",
+      "Would you recommend Lighthouse Voyages to other business owners? Why?"
+    ],
+    va: [
+      "What was your situation before joining Lighthouse Voyages?",
+      "How was your application and interview experience?",
+      "How did you feel when you were matched with your client?",
+      "How was your onboarding experience?",
+      "What has your experience working with your client been like?",
+      "How has this opportunity impacted you professionally or personally?",
+      "Would you recommend Lighthouse Voyages to other VAs? Why?"
+    ]
+  };
+
+  var state = { step:1, role:null, format:null, videoBlob:null, videoName:"" };
+
+  var $  = function(s){ return document.querySelector(s); };
+  var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+
+  /* ---------- step navigation ---------- */
+  function showStep(n){
+    state.step = n;
+    $$(".step").forEach(function(el){ el.hidden = Number(el.dataset.step) !== n; });
+    $$("#progress .p-step").forEach(function(li){
+      var s = Number(li.dataset.step);
+      li.classList.toggle("current", s === n);
+      li.classList.toggle("done", s < n);
+    });
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+
+  $$("[data-back]").forEach(function(b){
+    b.addEventListener("click", function(){ showStep(Math.max(1, state.step - 1)); });
+  });
+
+  /* ---------- step 1: role ---------- */
+  $$("[data-role]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      state.role = btn.dataset.role;
+      $$("[data-role]").forEach(function(b){ b.setAttribute("aria-pressed", String(b === btn)); });
+      renderPrompts();
+      $("#companyField").hidden = state.role !== "client";
+      $("#roleField").hidden    = state.role !== "va";
+      $("#sumRole").textContent = state.role === "client" ? "Client" : "Virtual Assistant (VA)";
+      setTimeout(function(){ showStep(2); }, 180);
+    });
+  });
+
+  function renderPrompts(){
+    var list = $("#promptList");
+    list.innerHTML = "";
+    (PROMPTS[state.role] || []).forEach(function(q){
+      var li = document.createElement("li");
+      li.textContent = q;
+      list.appendChild(li);
+    });
+  }
+
+  /* ---------- step 2: format ---------- */
+  $$("[data-format]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      state.format = btn.dataset.format;
+      $$("[data-format]").forEach(function(b){ b.setAttribute("aria-pressed", String(b === btn)); });
+      var isVideo = state.format === "video";
+      $("#videoPanel").hidden   = !isVideo;
+      $("#writtenPanel").hidden =  isVideo;
+      $("#storyHeading").textContent = isVideo ? "Record or upload your video" : "Write your testimonial";
+      $("#storySub").textContent = isVideo
+        ? "Aim for 30 seconds to 3 minutes. Speak like you're telling a friend."
+        : "A few honest sentences beat a long polished essay.";
+      $("#sumFormat").textContent = isVideo ? "Video" : "Written";
+      setTimeout(function(){ showStep(3); }, 180);
+    });
+  });
+
+  /* ---------- written ---------- */
+  var story = $("#story");
+  story.addEventListener("input", function(){
+    var words = story.value.trim() ? story.value.trim().split(/\s+/).length : 0;
+    $("#wordCount").textContent = words;
+    hide($("#storyError"));
+  });
+
+  /* ---------- video: camera + recording ---------- */
+  var stream = null, recorder = null, chunks = [], ticker = null, seconds = 0, camPromise = null;
+  var preview = $("#preview"), playback = $("#playback");
+
+  $("#modeRecord").addEventListener("click", function(){
+    $("#recordArea").hidden = false;
+    $("#uploadArea").hidden = true;
+    requestCamera().catch(camFail);
+  });
+
+  $("#modeUpload").addEventListener("click", function(){
+    $("#uploadArea").hidden = false;
+    $("#recordArea").hidden = true;
+    releaseCamera();
+    $("#videoFile").click();
+  });
+
+  function setPlaceholder(text){
+    var ph = $("#stagePlaceholder");
+    ph.textContent = text;
+    ph.hidden = false;
+  }
+
+  /* One shared promise, so the Start button can always wait for the camera
+     instead of silently doing nothing while it is still connecting. */
+  function requestCamera(){
+    if (camPromise) return camPromise;
+
+    hide($("#camError"));
+    setPlaceholder("Starting your camera…");
+
+    camPromise = new Promise(function(resolve, reject){
+      if (!window.isSecureContext){
+        return reject(tagged("insecure"));
+      }
+      if (blockedByEmbed()){
+        return reject(tagged("embedded"));
+      }
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+        return reject(tagged("unsupported"));
+      }
+      if (!window.MediaRecorder){
+        return reject(tagged("norecorder"));
+      }
+      navigator.mediaDevices.getUserMedia({
+        video: { facingMode:"user", width:{ ideal:1280 } },
+        audio: true
+      }).then(function(s){
+        stream = s;
+        preview.srcObject = s;
+        preview.muted = true;
+        var p = preview.play();
+        if (p && p.catch) p.catch(function(){});
+        $("#stagePlaceholder").hidden = true;
+        resolve(s);
+      }).catch(reject);
+    });
+
+    /* let the next attempt try again rather than caching the failure */
+    camPromise.catch(function(){ camPromise = null; });
+    return camPromise;
+  }
+
+  function tagged(name){ var e = new Error(name); e.name = name; return e; }
+
+  /* A page inside a frame can only reach the camera if the frame grants it.
+     When it doesn't, the browser refuses instantly and never shows a prompt. */
+  function blockedByEmbed(){
+    if (window.self === window.top) return false;
+    try{
+      var fp = document.featurePolicy || document.permissionsPolicy;
+      if (fp && typeof fp.allowsFeature === "function"){
+        return !fp.allowsFeature("camera") || !fp.allowsFeature("microphone");
+      }
+    }catch(e){}
+    return false;
+  }
+
+  function camFail(err){
+    var name = (err && err.name) || "";
+    var msg;
+
+    if (name === "insecure"){
+      msg = "Recording needs a secure (https) address. Open this page on its live https link, or choose Upload Video instead.";
+    } else if (name === "unsupported" || name === "norecorder"){
+      msg = "This browser can't record video. Please choose Upload Video instead, or try Chrome or Safari.";
+    } else if (name === "NotAllowedError" || name === "SecurityError" || name === "PermissionDeniedError"){
+      msg = "Camera and microphone access is blocked. Tap the camera icon in your browser's address bar, choose Allow, then tap Start Recording again.";
+    } else if (name === "NotFoundError" || name === "DevicesNotFoundError" || name === "OverconstrainedError"){
+      msg = "We couldn't find a camera on this device. Please choose Upload Video instead.";
+    } else if (name === "NotReadableError" || name === "TrackStartError"){
+      msg = "Your camera is already being used by another app. Close it (Zoom, Meet, FaceTime) and tap Start Recording again.";
+    } else if (name === "embedded"){
+      msg = "This preview window doesn't allow camera access, so your browser never asks. Open the page in its own tab to record, or choose Upload Video instead.";
+    } else {
+      msg = "We couldn't reach your camera. Check that no other app is using it, then tap Start Recording again.";
+    }
+
+    var box = $("#camError");
+    box.textContent = msg;
+    box.hidden = false;
+    setPlaceholder("Camera preview unavailable.");
+    resetRecordButtons();
+  }
+
+  function releaseCamera(){
+    if (stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream = null; }
+    camPromise = null;
+    preview.srcObject = null;
+  }
+
+  function pickMime(){
+    var opts = ["video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm","video/mp4"];
+    for (var i=0;i<opts.length;i++){
+      try{ if (MediaRecorder.isTypeSupported(opts[i])) return opts[i]; }catch(e){}
+    }
+    return "";
+  }
+
+  function resetRecordButtons(){
+    var b = $("#btnStart");
+    b.disabled = false;
+    b.hidden = false;
+    b.textContent = "Start Recording";
+    $("#btnStop").hidden = true;
+    $("#timer").hidden = true;
+    $("#recBar").classList.remove("rec-live");
+  }
+
+  /* Always waits for the camera. Never dead-ends. */
+  $("#btnStart").addEventListener("click", function(){
+    var b = this;
+    b.disabled = true;
+    b.textContent = "Starting…";
+    requestCamera().then(function(){
+      b.disabled = false;
+      b.textContent = "Start Recording";
+      beginRecording();
+    }).catch(function(err){
+      b.disabled = false;
+      b.textContent = "Start Recording";
+      camFail(err);
+    });
+  });
+
+  function beginRecording(){
+    chunks = []; seconds = 0;
+    var mime = pickMime();
+    try{
+      recorder = mime ? new MediaRecorder(stream, { mimeType:mime }) : new MediaRecorder(stream);
+    }catch(err){
+      return camFail(tagged("norecorder"));
+    }
+
+    recorder.ondataavailable = function(e){ if (e.data && e.data.size) chunks.push(e.data); };
+    recorder.onerror = function(){ stopRecording(); camFail(tagged("generic")); };
+    recorder.onstop = function(){
+      clearInterval(ticker);
+      if (!chunks.length){ return camFail(tagged("generic")); }
+      var type = (recorder.mimeType || "video/webm").split(";")[0];
+      var blob = new Blob(chunks, { type:type });
+      var ext  = type.indexOf("mp4") > -1 ? "mp4" : "webm";
+      useVideo(blob, "lighthouse-testimonial." + ext);
+    };
+
+    recorder.start(1000);   /* timeslice keeps data flowing on mobile Safari */
+
+    $("#btnStart").hidden = true;
+    $("#btnStop").hidden = false;
+    $("#timer").hidden = false;
+    $("#recBar").classList.add("rec-live");
+    paintTimer();
+    ticker = setInterval(function(){
+      seconds++;
+      paintTimer();
+      if (seconds >= CONFIG.MAX_RECORD_SECONDS) stopRecording();
+    }, 1000);
+  }
+
+  function paintTimer(){
+    var m = Math.floor(seconds/60), s = seconds % 60;
+    $("#timer").innerHTML = '<span class="rec-dot"></span>' + m + ":" + (s<10?"0":"") + s;
+  }
+
+  function stopRecording(){
+    clearInterval(ticker);
+    if (recorder && recorder.state !== "inactive"){
+      try{ recorder.stop(); }catch(e){}
+    }
+    resetRecordButtons();
+  }
+  $("#btnStop").addEventListener("click", stopRecording);
+
+
+  /* ---------- video: upload ---------- */
+  $("#videoFile").addEventListener("change", function(e){
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    if (f.size > CONFIG.MAX_VIDEO_MB * 1024 * 1024){
+      var er = $("#storyError");
+      er.textContent = "That file is larger than " + CONFIG.MAX_VIDEO_MB + " MB. Please trim the video or record a shorter one.";
+      er.hidden = false;
+      return;
+    }
+    useVideo(f, f.name);
+  });
+
+  function useVideo(blob, name){
+    state.videoBlob = blob;
+    state.videoName = name;
+    playback.src = URL.createObjectURL(blob);
+    $("#pickedName").textContent = name;
+    $("#pickedSize").textContent = (blob.size/(1024*1024)).toFixed(1) + " MB";
+    $("#videoResult").hidden = false;
+    hide($("#storyError"));
+    hide($("#camError"));
+    releaseCamera();
+    $("#recordArea").hidden = true;
+    $("#uploadArea").hidden = true;
+  }
+
+  $("#btnRedo").addEventListener("click", function(){
+    state.videoBlob = null; state.videoName = "";
+    playback.removeAttribute("src");
+    $("#videoResult").hidden = true;
+    $("#videoFile").value = "";
+    resetRecordButtons();
+    $("#recordArea").hidden = false;
+    requestCamera().catch(camFail);
+  });
+
+  /* ---------- validation ---------- */
+  function hide(el){ el.hidden = true; }
+  function fail(el, msg){ el.textContent = msg; el.hidden = false; el.scrollIntoView({ behavior:"smooth", block:"center" }); return false; }
+
+  $("#toStep4").addEventListener("click", function(){
+    var err = $("#storyError");
+    if (state.format === "written"){
+      if (story.value.trim().length < 20) return fail(err, "Please write at least a sentence or two about your experience.");
+    } else if (!state.videoBlob){
+      return fail(err, "Please record or upload your video before continuing.");
+    }
+    hide(err);
+    showStep(4);
+  });
+
+  $("#tagOk").addEventListener("change", function(){
+    $("#socialField").hidden = !this.checked;
+  });
+
+  /* ---------- submit ---------- */
+  $("#form").addEventListener("submit", function(e){
+    e.preventDefault();
+    var err = $("#submitError");
+    var name = $("#fullName").value.trim();
+    var email = $("#email").value.trim();
+
+    if (!name) return fail(err, "Please add your full name.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail(err, "Please add a valid email address so we can reach you.");
+    if (!$("#consent").checked) return fail(err, "We need your permission before we can share your testimonial.");
+    hide(err);
+
+    var btn = $("#btnSubmit");
+    btn.disabled = true;
+    btn.textContent = "Sending your story...";
+
+    var payload = {
+      submitted_at: new Date().toISOString(),
+      role: state.role === "client" ? "Client" : "Virtual Assistant (VA)",
+      testimonial_format: state.format === "video" ? "Video" : "Written",
+      full_name: name,
+      email: email,
+      company_name: state.role === "client" ? $("#company").value.trim() : "",
+      current_role: state.role === "va" ? $("#position").value.trim() : "",
+      written_testimonial: state.format === "written" ? story.value.trim() : "",
+      video_file_name: state.videoName || "",
+      marketing_permission: true,
+      social_tag_permission: $("#tagOk").checked,
+      social_handle: $("#tagOk").checked ? $("#social").value.trim() : ""
+    };
+
+    send(payload).then(done).catch(function(){
+      btn.disabled = false;
+      btn.textContent = "Submit My Testimonial";
+      fail(err, "Something went wrong sending your testimonial. Please try again, or email us and we'll help.");
+    });
+  });
+
+  function send(payload){
+    if (!CONFIG.WEBHOOK_URL){
+      console.log("[Lighthouse Voyages] Demo mode — no webhook set. Payload:", payload, state.videoBlob);
+      return new Promise(function(res){ setTimeout(res, 900); });
+    }
+    var fd = new FormData();
+    Object.keys(payload).forEach(function(k){ fd.append(k, payload[k]); });
+    if (state.videoBlob) fd.append("video", state.videoBlob, state.videoName || "testimonial.webm");
+    return fetch(CONFIG.WEBHOOK_URL, { method:"POST", body:fd }).then(function(r){
+      if (!r.ok) throw new Error("bad response");
+    });
+  }
+
+  function done(){
+    releaseCamera();
+    $("#form").hidden = true;
+    document.querySelector(".progress").hidden = true;
+    document.querySelector(".masthead").hidden = true;
+    $("#thanks").hidden = false;
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+})();
+</script>
