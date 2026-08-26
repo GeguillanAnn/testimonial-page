@@ -236,6 +236,17 @@
   .picked .name{ font-size:15px; font-weight:bold; word-break:break-all; }
   .picked .size{ font-size:13px; color:var(--ink-2); font-variant-numeric:tabular-nums; }
 
+  .prog-track{
+    height:10px; border-radius:999px; background:var(--cream-deep);
+    border:1px solid var(--line); overflow:hidden;
+  }
+  .prog-fill{
+    height:100%; width:0%; background:var(--papaya);
+    border-radius:999px; transition:width .3s ease;
+  }
+  #uploadProgress{ display:flex; flex-direction:column; gap:10px; }
+  #uploadProgress[hidden]{ display:none; }
+
   .quote{
     border-left:4px solid var(--papaya); padding:2px 0 2px 16px;
     margin:0; font-size:16px; color:var(--ink-2); line-height:1.55;
@@ -545,6 +556,11 @@
 
       <p class="error" id="submitError" hidden></p>
 
+      <div id="uploadProgress" hidden aria-live="polite">
+        <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+        <p class="hint" id="progText">Uploading your video&hellip;</p>
+      </div>
+
       <div class="nav-row">
         <button type="button" class="btn btn-ghost" data-back>Back</button>
         <button type="submit" class="btn btn-primary btn-lg" id="btnSubmit">Submit My Testimonial</button>
@@ -574,6 +590,7 @@
      Leave blank to run the page in demo mode (no data is sent).
      ============================================================ */
   var CONFIG = {
+    SCRIPT_URL:  "",           // Apps Script /exec URL — saves the video to Drive
     WEBHOOK_URL: "",           // e.g. "https://services.leadconnectorhq.com/hooks/xxxxx"
     MAX_VIDEO_MB: 100,         // rejects uploads larger than this
     MAX_RECORD_SECONDS: 240,   // hard stop at 4 minutes
@@ -966,23 +983,130 @@
       social_handle: $("#tagOk").checked ? $("#social").value.trim() : ""
     };
 
-    send(payload).then(done).catch(function(){
+    send(payload).then(done).catch(function(problem){
       btn.disabled = false;
       btn.textContent = "Submit My Testimonial";
-      fail(err, "Something went wrong sending your testimonial. Please try again, or email us and we'll help.");
+      $("#uploadProgress").hidden = true;
+      var why = (problem && problem.message) ? " (" + problem.message + ")" : "";
+      fail(err, "We couldn't send your testimonial" + why + " Please try again — your video is still here, nothing was lost.");
     });
   });
 
-  function send(payload){
+  function showProgress(pct, text){
+    $("#uploadProgress").hidden = false;
+    $("#progFill").style.width = Math.max(0, Math.min(100, pct)) + "%";
+    $("#progText").textContent = text;
+  }
+
+  /* text/plain keeps this a "simple" request, so the browser skips the
+     preflight that Apps Script web apps do not answer. */
+  function callScript(obj){
+    return fetch(CONFIG.SCRIPT_URL, {
+      method: "POST",
+      redirect: "follow",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(obj)
+    }).then(function(r){ return r.json(); });
+  }
+
+  function scriptFields(payload){
+    return {
+      role: payload.role,
+      format: payload.testimonial_format,
+      fullName: payload.full_name,
+      email: payload.email,
+      company: payload.company_name,
+      currentRole: payload.current_role,
+      written: payload.written_testimonial,
+      marketingPermission: payload.marketing_permission,
+      socialTagOk: payload.social_tag_permission,
+      socialHandle: payload.social_handle
+    };
+  }
+
+  /* Bytes go straight from the browser to Google's upload endpoint using a
+     one-time session URI. No Google credential ever reaches this page. */
+  function putBytes(uri){
+    return new Promise(function(resolve, reject){
+      var xhr = new XMLHttpRequest();
+      xhr.open("PUT", uri, true);
+      xhr.setRequestHeader("Content-Type", state.videoBlob.type || "video/webm");
+      xhr.upload.onprogress = function(e){
+        if (e.lengthComputable){
+          showProgress(Math.round((e.loaded / e.total) * 95), "Uploading your video…");
+        }
+      };
+      xhr.onload = function(){
+        if (xhr.status >= 200 && xhr.status < 300){
+          try{ resolve(JSON.parse(xhr.responseText).id); }
+          catch(err){ reject(new Error("The upload finished but Drive sent back something unexpected.")); }
+        } else {
+          reject(new Error("Drive rejected the upload (" + xhr.status + ")."));
+        }
+      };
+      xhr.onerror   = function(){ reject(new Error("The connection dropped while uploading.")); };
+      xhr.ontimeout = function(){ reject(new Error("The upload timed out.")); };
+      xhr.send(state.videoBlob);
+    });
+  }
+
+  function uploadVideo(payload){
+    showProgress(2, "Getting ready…");
+    return callScript({
+      action: "start",
+      mimeType: state.videoBlob.type || "video/webm",
+      fullName: payload.full_name,
+      email: payload.email,
+      role: payload.role
+    }).then(function(r){
+      if (!r || !r.ok) throw new Error((r && r.error) || "Could not start the upload.");
+      return putBytes(r.uploadUri);
+    }).then(function(fileId){
+      showProgress(98, "Saving your video…");
+      var fields = scriptFields(payload);
+      fields.action = "finish";
+      fields.fileId = fileId;
+      return callScript(fields);
+    }).then(function(r){
+      if (!r || !r.ok) throw new Error((r && r.error) || "Could not save the video.");
+      showProgress(100, "Done.");
+      return r.fileUrl;
+    });
+  }
+
+  function postToGhl(payload){
     if (!CONFIG.WEBHOOK_URL){
-      console.log("[Lighthouse Voyages] Demo mode — no webhook set. Payload:", payload, state.videoBlob);
-      return new Promise(function(res){ setTimeout(res, 900); });
+      console.log("[Lighthouse Voyages] No GHL webhook set. Payload:", payload);
+      return Promise.resolve();
     }
     var fd = new FormData();
     Object.keys(payload).forEach(function(k){ fd.append(k, payload[k]); });
-    if (state.videoBlob) fd.append("video", state.videoBlob, state.videoName || "testimonial.webm");
     return fetch(CONFIG.WEBHOOK_URL, { method:"POST", body:fd }).then(function(r){
-      if (!r.ok) throw new Error("bad response");
+      if (!r.ok) throw new Error("The submission service returned an error.");
+    });
+  }
+
+  function send(payload){
+    if (!CONFIG.SCRIPT_URL && !CONFIG.WEBHOOK_URL){
+      console.log("[Lighthouse Voyages] Demo mode — nothing configured. Payload:", payload, state.videoBlob);
+      return new Promise(function(res){ setTimeout(res, 900); });
+    }
+
+    var first;
+    if (state.videoBlob && CONFIG.SCRIPT_URL){
+      first = uploadVideo(payload);
+    } else if (CONFIG.SCRIPT_URL){
+      var fields = scriptFields(payload);
+      fields.action = "log";
+      first = callScript(fields).then(function(){ return ""; });
+    } else {
+      if (state.videoBlob) console.warn("[Lighthouse Voyages] Video recorded but SCRIPT_URL is not set — it will not be saved.");
+      first = Promise.resolve("");
+    }
+
+    return first.then(function(link){
+      payload.video_url = link || "";
+      return postToGhl(payload);
     });
   }
 
