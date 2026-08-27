@@ -1,0 +1,53 @@
+<title>Testimonial Intake Check</title>
+<style>
+  body{margin:0;background:#FAF5EC;color:#2A2A2A;font-family:Arial,Helvetica,sans-serif;line-height:1.6;}
+  .wrap{max-width:640px;margin:0 auto;padding:40px 20px;}
+  h1{font-size:28px;margin:0 0 8px;}
+  p.sub{color:#4B443A;margin:0 0 28px;}
+  .test{background:#fff;border:1px solid #EFE6D5;border-radius:16px;padding:20px;margin-bottom:14px;
+        box-shadow:0 1px 2px rgba(42,42,42,.05),0 4px 14px rgba(42,42,42,.06);}
+  .name{font-weight:bold;font-size:16px;margin-bottom:6px;}
+  .state{font-weight:bold;font-size:14px;letter-spacing:.08em;text-transform:uppercase;}
+  .pass{color:#1F7A4D;} .fail{color:#B3261E;} .wait{color:#B85E00;}
+  pre{background:#F2E9D8;border-radius:10px;padding:12px;overflow-x:auto;font-size:13px;
+      white-space:pre-wrap;word-break:break-word;margin:10px 0 0;}
+</style>
+<div class="wrap">
+  <h1>Testimonial intake check</h1>
+  <p class="sub">Confirms the Apps Script is reachable from a real browser, and that it can create a Drive upload session.</p>
+  <div class="test"><div class="name">1. Script is deployed and public</div><div class="state wait" id="s1">Testing…</div><pre id="d1"></pre></div>
+  <div class="test"><div class="name">2. Script accepts a POST</div><div class="state wait" id="s2">Testing…</div><pre id="d2"></pre></div>
+  <div class="test"><div class="name">3. Drive folder accepts an upload session</div><div class="state wait" id="s3">Testing…</div><pre id="d3"></pre></div>
+</div>
+<script>
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFRaWrqiGRhD5q-uWf74B1cu0veDOuhtgvGtSHmBo0Mda1KPLSThSEw61KAPWRBXVc/exec";
+
+function mark(n, ok, detail){
+  var s = document.getElementById("s"+n);
+  s.className = "state " + (ok ? "pass" : "fail");
+  s.textContent = ok ? "Passed" : "Failed";
+  document.getElementById("d"+n).textContent = detail;
+}
+function post(body){
+  return fetch(SCRIPT_URL, { method:"POST", redirect:"follow",
+    headers:{"Content-Type":"text/plain;charset=utf-8"}, body: JSON.stringify(body) })
+    .then(function(r){ return r.text().then(function(t){ return { status:r.status, text:t }; }); });
+}
+
+fetch(SCRIPT_URL).then(function(r){ return r.text(); }).then(function(t){
+  mark(1, t.indexOf('"ok":true') > -1, t.slice(0,200));
+}).catch(function(e){ mark(1, false, String(e)); });
+
+post({action:"nope"}).then(function(r){
+  var ok = r.text.lastIndexOf("{",0) === 0;
+  mark(2, ok, ok ? r.text.slice(0,200)
+    : "Status " + r.status + ". Got HTML instead of JSON — usually means the deployment needs re-deploying as a new version, or access is not set to Anyone.\n\n" + r.text.slice(0,200));
+}).catch(function(e){ mark(2, false, "Blocked before a reply arrived: " + e); });
+
+post({action:"start", mimeType:"video/webm", fullName:"Connection Check", email:"check@example.com", role:"Client"})
+.then(function(r){
+  var ok = r.text.indexOf("uploadUri") > -1;
+  mark(3, ok, ok ? "Drive returned an upload session. Everything is wired up."
+    : r.text.slice(0,300));
+}).catch(function(e){ mark(3, false, String(e)); });
+</script>
