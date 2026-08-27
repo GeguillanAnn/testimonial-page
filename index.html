@@ -1024,9 +1024,9 @@
     };
   }
 
-  /* Bytes go straight from the browser to Google's upload endpoint using a
-     one-time session URI. No Google credential ever reaches this page. */
-  function putBytes(uri){
+  /* Fast path: bytes go straight from the browser to Google's upload endpoint.
+     Works only if the session was opened with our origin declared. */
+  function putDirect(uri){
     return new Promise(function(resolve, reject){
       var xhr = new XMLHttpRequest();
       xhr.open("PUT", uri, true);
@@ -1039,15 +1039,55 @@
       xhr.onload = function(){
         if (xhr.status >= 200 && xhr.status < 300){
           try{ resolve(JSON.parse(xhr.responseText).id); }
-          catch(err){ reject(new Error("The upload finished but Drive sent back something unexpected.")); }
+          catch(err){ reject(new Error("Drive sent back something unexpected.")); }
         } else {
           reject(new Error("Drive rejected the upload (" + xhr.status + ")."));
         }
       };
-      xhr.onerror   = function(){ reject(new Error("The connection dropped while uploading.")); };
-      xhr.ontimeout = function(){ reject(new Error("The upload timed out.")); };
+      xhr.onerror   = function(){ reject(new Error("blocked")); };
+      xhr.ontimeout = function(){ reject(new Error("blocked")); };
       xhr.send(state.videoBlob);
     });
+  }
+
+  function toBase64(blob){
+    return new Promise(function(resolve, reject){
+      var fr = new FileReader();
+      fr.onload  = function(){ resolve(String(fr.result).split(",")[1]); };
+      fr.onerror = function(){ reject(new Error("Could not read the video.")); };
+      fr.readAsDataURL(blob);
+    });
+  }
+
+  /* Fallback: hand the video to the script a slice at a time. No cross-origin
+     request is involved, so it works even where the direct upload is blocked. */
+  function putRelayed(uploadId){
+    var CHUNK = 4 * 1024 * 1024;
+    var blob  = state.videoBlob;
+    var total = blob.size;
+    var sent  = 0;
+
+    function step(){
+      if (sent >= total) return Promise.reject(new Error("The upload ended early."));
+      var slice = blob.slice(sent, Math.min(sent + CHUNK, total));
+      return toBase64(slice).then(function(data){
+        return callScript({
+          action: "chunk",
+          uploadId: uploadId,
+          data: data,
+          start: sent,
+          total: total,
+          mimeType: blob.type || "video/webm"
+        });
+      }).then(function(r){
+        if (!r || !r.ok) throw new Error((r && r.error) || "A piece of the video did not go through.");
+        if (r.done) return r.fileId;
+        sent = r.received;
+        showProgress(Math.round((sent / total) * 95), "Uploading your video…");
+        return step();
+      });
+    }
+    return step();
   }
 
   function uploadVideo(payload){
@@ -1055,12 +1095,19 @@
     return callScript({
       action: "start",
       mimeType: state.videoBlob.type || "video/webm",
+      size: state.videoBlob.size,
+      origin: window.location.origin,
       fullName: payload.full_name,
       email: payload.email,
       role: payload.role
     }).then(function(r){
       if (!r || !r.ok) throw new Error((r && r.error) || "Could not start the upload.");
-      return putBytes(r.uploadUri);
+      return putDirect(r.uploadUri).catch(function(err){
+        if (err && err.message !== "blocked") throw err;
+        /* direct upload refused — fall back to relaying through the script */
+        showProgress(2, "Uploading your video…");
+        return putRelayed(r.uploadId);
+      });
     }).then(function(fileId){
       showProgress(98, "Saving your video…");
       var fields = scriptFields(payload);

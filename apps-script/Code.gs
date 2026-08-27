@@ -39,6 +39,7 @@ function doPost(e) {
     var body = JSON.parse(e.postData.contents);
 
     if (body.action === 'start')  return json(startUpload(body));
+    if (body.action === 'chunk')  return json(uploadChunk(body));
     if (body.action === 'finish') return json(finishUpload(body));
     if (body.action === 'log')    return json(logRow(body));
 
@@ -74,15 +75,22 @@ function startUpload(body) {
     ].filter(String).join(' · ')
   };
 
+  var initHeaders = {
+    Authorization: 'Bearer ' + ScriptApp.getOAuthToken(),
+    'X-Upload-Content-Type': mime
+  };
+  /* A resumable session only accepts uploads from a browser if the origin was
+     declared when the session was created. Without this the browser's PUT is
+     refused with no readable reason. */
+  if (body.origin) initHeaders['Origin'] = body.origin;
+  if (body.size)   initHeaders['X-Upload-Content-Length'] = String(body.size);
+
   var res = UrlFetchApp.fetch(
     'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true',
     {
       method: 'post',
       contentType: 'application/json; charset=UTF-8',
-      headers: {
-        Authorization: 'Bearer ' + ScriptApp.getOAuthToken(),
-        'X-Upload-Content-Type': mime
-      },
+      headers: initHeaders,
       payload: JSON.stringify(meta),
       muteHttpExceptions: true
     }
@@ -101,7 +109,42 @@ function startUpload(body) {
     }
     throw new Error('Drive refused the upload session: ' + body.slice(0, 300));
   }
-  return { ok: true, uploadUri: uri };
+  /* Remember the session so the browser can also push chunks through this
+     script if it cannot reach the upload endpoint directly. */
+  var uploadId = Utilities.getUuid();
+  CacheService.getScriptCache().put('u_' + uploadId, uri, 21600);
+
+  return { ok: true, uploadUri: uri, uploadId: uploadId };
+}
+
+/**
+ * Relays one slice of the video to the resumable session. Used when the browser
+ * cannot PUT to Google's upload endpoint directly. Slower, because the bytes
+ * travel base64-encoded, but it involves no cross-origin request at all.
+ */
+function uploadChunk(body) {
+  var uri = CacheService.getScriptCache().get('u_' + body.uploadId);
+  if (!uri) throw new Error('That upload session expired. Please submit again.');
+
+  var bytes = Utilities.base64Decode(body.data);
+  var start = Number(body.start);
+  var total = Number(body.total);
+  var end = start + bytes.length - 1;
+
+  var res = UrlFetchApp.fetch(uri, {
+    method: 'put',
+    contentType: body.mimeType || 'video/webm',
+    headers: { 'Content-Range': 'bytes ' + start + '-' + end + '/' + total },
+    payload: bytes,
+    muteHttpExceptions: true
+  });
+
+  var code = res.getResponseCode();
+  if (code === 308) return { ok: true, done: false, received: end + 1 };
+  if (code === 200 || code === 201) {
+    return { ok: true, done: true, fileId: JSON.parse(res.getContentText()).id };
+  }
+  throw new Error('Drive rejected the upload (' + code + '): ' + res.getContentText().slice(0, 200));
 }
 
 /** Called once the browser has finished pushing bytes. */
