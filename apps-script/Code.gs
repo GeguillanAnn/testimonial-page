@@ -91,7 +91,15 @@ function startUpload(body) {
   var headers = res.getAllHeaders();
   var uri = headers['Location'] || headers['location'];
   if (!uri) {
-    throw new Error('Drive refused the upload session: ' + res.getContentText().slice(0, 300));
+    var body = res.getContentText();
+    if (body.indexOf('insufficient authentication scopes') > -1 || body.indexOf('Insufficient Permission') > -1) {
+      throw new Error(
+        'This script is not authorized for Drive yet. Open Project Settings, tick ' +
+        '"Show appsscript.json manifest file", make sure the oauthScopes block is present, ' +
+        'run testSetup once and accept the prompt, then Deploy a NEW VERSION.'
+      );
+    }
+    throw new Error('Drive refused the upload session: ' + body.slice(0, 300));
   }
   return { ok: true, uploadUri: uri };
 }

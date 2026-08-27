@@ -77,6 +77,31 @@ Fields sent to GHL: `submitted_at`, `role`, `testimonial_format`, `full_name`,
 `video_file_name`, `video_url`, `marketing_permission`,
 `social_tag_permission`, `social_handle`.
 
+## Troubleshooting
+
+Open `test-connection.html` in a browser — it reports which stage fails.
+
+**"Insufficient authentication scopes" / 403 on test 3**
+The script holds a token from before it needed Drive. Scopes are granted at
+authorization time, so adding Drive code later does not widen an existing grant.
+
+1. Project Settings (gear) > tick **Show "appsscript.json" manifest file**
+2. Open `appsscript.json`, confirm the `oauthScopes` block matches the copy in
+   this repo, and save
+3. Run `testSetup` from the editor. A consent screen appears asking for Drive
+   access — accept it. If no prompt appears, the scopes did not change; re-check
+   step 2.
+4. **Deploy > Manage deployments > pencil > Version: New version > Deploy**
+
+**Test 2 returns HTML instead of JSON**
+The deployment is serving an older version. Editing code does not publish it —
+deploy a new version. Also confirm access is **Anyone**, not "Anyone with a
+Google account".
+
+**curl gets HTML but the browser works**
+Expected. Apps Script answers a POST with a redirect to a googleusercontent echo
+URL that only resolves in a browser. Test from a browser, not the command line.
+
 ## Video size
 
 In-page recording is capped at 720p / 1.2 Mbps, which puts a 3-minute clip near
